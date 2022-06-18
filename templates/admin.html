@@ -85,7 +85,7 @@
             const element = e.target
             const parent = element.parentNode.parentNode
             const id = parent.dataset.id
- 
+
             if(await fetchData('http://localhost:3000/eshop/update/' + id, 'PUT', {
                     status: 'Atšaukta'
                 })) {
