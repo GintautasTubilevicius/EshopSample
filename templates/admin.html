@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Užsakymų sąrašas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <style>
+        body{
+            padding: 30px;
+        }
+        h1 {
+            margin-bottom: 50px;
+        }
+        .navbar {
+            margin-bottom: 50px;
+        }
+        #list{
+            margin-bottom: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="http://localhost:3000/">Pradinis užsakymo puslapis</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-link active" aria-current="page" href="http://localhost:3000/eshop/admin">Peržiūrėti užsakymus</a>
+                <a class="nav-link active" aria-current="page" href="http://localhost:3000/eshop/prekes">Prekių sąrašas</a>
+            </div>
+          </div>
+        </div>
+    </nav>
+    
+    <h1>Užsakymų sąrašas</h1>
+
+    <div id="list"></div>
+
+    <script>
+        const fetchData = async (url, method = 'GET', body = {}) => {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+
+            if (method != 'GET')
+                options.body = JSON.stringify(body)
+
+            const tasks = await fetch(url, options)
+
+            if (tasks.status === 200) {
+                if (method == 'GET')
+                    return await tasks.json()
+                else
+                    return true
+            } else {
+                return false
+            }
+        }
+        const uzbaigtaItem = async (e) => {
+            const element = e.target
+            const parent = element.parentNode.parentNode
+            const id = parent.dataset.id
+ 
+            if(await fetchData('http://localhost:3000/eshop/update/' + id, 'PUT', {
+                    status: 'Užbaigta'
+                })) {
+                ordersList('Būsena pakeista')
+            } else {
+                ordersList('Nepavyko pakeisti būsenos', 'danger')
+            }
+        }
+
+        const atsauktaItem = async (e) => {
+            const element = e.target
+            const parent = element.parentNode.parentNode
+            const id = parent.dataset.id
+ 
+            if(await fetchData('http://localhost:3000/eshop/update/' + id, 'PUT', {
+                    status: 'Atšaukta'
+                })) {
+                ordersList('Būsena pakeista')
+            } else {
+                ordersList('Nepavyko pakeisti būsenos', 'danger')
+            }
+        }
+
+        const deleteItem = async (e) => {
+            const element = e.target
+            const parent = element.parentNode.parentNode
+            const id = parent.dataset.id
+
+            if(await fetchData('http://localhost:3000/eshop/delete/' + id, 'DELETE')) {
+                ordersList('Užsakymas sėkmingai ištrintas')
+            } else {
+                ordersList('Nepavyko ištrinti užsakymo', 'danger')
+            }
+        }
+
+        const ordersList = async (message = '', status = 'success') => {
+            let busena = ''
+            const orders = await fetchData('http://localhost:3000/eshop/all')
+
+            let html = ''
+
+            if(message)
+                html += `<div class="alert alert-${status}">${message}</div>`
+           
+            html += `<table class="table mt-3 align-middle">
+                <thead>
+                    <th>Nr</th>
+                    <th>Prekė</th>
+                    <th>Vardas</th>
+                    <th>Pavardė</th>
+                    <th>Adresas</th>
+                    <th>Miestas</th>
+                    <th>Telefonas</th>
+                    <th>El.paštas</th>
+                    <th>Būsena</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </thead>
+            <tbody>
+                        `
+
+            orders.map((order, i) => {
+
+                if (order.status === 'Užbaigta') busena = 'success'
+                else if (order.status === 'Atšaukta') busena = 'warning'
+                else busena = 'light'
+
+                html += `<tr class="table-${busena}" data-id="${order._id} ">
+                            <td class="order-name">${i+1}</td>
+                            <td class="order-name">${order.item}</td>
+                            <td class="order-name">${order.name}</td>
+                            <td class="order-name">${order.lastName}</td>
+                            <td class="order-name">${order.address}</td>
+                            <td class="order-name">${order.city}</td>
+                            <td class="order-name">${order.phone}</td>
+                            <td class="order-name">${order.email}</td>
+                            <td class="order-name">${order.status}</td>
+                            <td class="order-name text-end">
+                                <button class="btn btn-success" onclick="uzbaigtaItem(event)">Užbaigtas</button>
+                            </td>
+                            <td class="order-name text-end">
+                                <button class="btn btn-warning" onclick="atsauktaItem(event)">Atšauktas</button>
+                            </td>
+                            <td class="order-name text-end">
+                                <button class="btn btn-danger" onclick="deleteItem(event)">Trinti</button>
+                            </td>
+                        </tr>`
+            })
+
+            html += '</tbody></table>'
+
+            document.querySelector('#list').innerHTML = html
+        }
+
+        ordersList()
+    </script>
+</body>
+
+</html>

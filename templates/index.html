@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Užsakymas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <style>
+        h1 {
+            margin-bottom: 5rem;
+        }
+        .pavadinimas {
+            font-weight: 800;
+        }
+        img {
+            width: 80px
+        }
+        body {
+            padding: 30px;
+        }
+        p {
+            max-width: 200px;
+        }
+        .prekiuSarasas {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+        .stulpelis {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-items: center;
+            align-items: center;
+            border: 1px solid rgb(64, 32, 153);
+            border-radius: 30px;
+            max-height: 100%;
+            min-width: 250px;
+        }
+        .aprasymas {
+            text-align: center;
+            max-width: 200px;
+        }
+        label {
+            font-weight: 600;
+        }
+        .main {
+            display:flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+        .row {
+            max-width: 60%;
+        }
+        .alert {
+            width: 60%;
+            }
+        @media (max-width:680px){
+            h1 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            }
+            .row{
+            max-width: 90%;
+            }
+            .alert {
+            width: 90%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+    <h1>Užsakymo forma - pasirinkite prekę</h1>
+    <div class="alert alert-success" role="alert" style="display: none"></div>
+    <form class="row g-3" action="http://localhost:3000/eshop/new" onsubmit="addTask(event)" method="POST">
+        <div id="prekes" class="prekiuSarasas">
+            
+        </div>
+        
+        <div class="col-md-6">
+            <label for="inputName" class="form-label">Vardas</label>
+            <input type="text" class="form-control" id="inputName" name="name" placeholder="Vardenis"
+                aria-label="First name">
+        </div>
+        <div class="col-md-6">
+            <label for="inputLastName" class="form-label">Pavardė</label>
+            <input type="text" class="form-control" id="inputLastName" name="lastName" placeholder="Pavardenis"
+                aria-label="Last name">
+        </div>
+        <div class="col-12">
+            <label for="inputAddress" class="form-label">Adresas</label>
+            <input type="text" name="address" class="form-control" id="inputAddress" placeholder="Gatvė, namo nr.">
+        </div>
+        <div class="col-md-6">
+            <label for="inputCity" class="form-label">Miestas</label>
+            <input type="text" name="city" class="form-control" id="inputCity">
+        </div>
+        <div class="col-md-6">
+            <label for="inputPhone" class="form-label">Telefonas</label>
+            <input type="phone" name="phone" class="form-control" id="inputPhone">
+        </div>
+        <div class="col-md-6">
+            <label for="inputEmail" class="form-label">El. paštas</label>
+            <input type="email" name="email" class="form-control" id="inputEmail">
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Užsakyti</button>
+        </div>
+    </form>
+</div>
+
+    <script>
+
+        const fetchData = async (url, method = 'GET', body = {}) => {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+
+            if (method != 'GET')
+                options.body = JSON.stringify(body)
+
+            const tasks = await fetch(url, options)
+
+            if (tasks.status === 200) {
+                if (method == 'GET')
+                    return await tasks.json()
+                else
+                    return true
+            } else {
+                return false
+            }
+        }
+
+        const prekiuList = async (message = '', status = 'success') => {
+            let busena = ''
+            const prekes = await fetchData('http://localhost:3000/eshop/prekes/all')
+
+            let html = ''
+
+            prekes.forEach((preke) => {
+
+                
+                html += `
+                    <div class="stulpelis">
+                        <div>
+                            <input class="form-check-input" type="radio" name="daiktas" value="${preke.item}" id="flexRadioDefault1">
+                        </div>
+                        <div>
+                            <img src="/uploads/${preke.photo}">
+                        </div>
+                        <div class="pavadinimas">${preke.item}</div>
+                        <div class="aprasymas">${preke.description}</div>
+                    </div>
+                    `
+            })
+
+
+            document.querySelector('#prekes').innerHTML = html
+        }
+
+        prekiuList()
+
+        
+        const addTask = async (event) => {
+            event.preventDefault()
+
+            const url = event.target.getAttribute('action')
+            const radio = event.target.querySelector('input[name="daiktas"]:checked').value
+            const name = event.target.querySelector('input[name="name"]').value
+            const lastName = event.target.querySelector('input[name="lastName"]').value
+            const address = event.target.querySelector('input[name="address"]').value
+            const city = event.target.querySelector('input[name="city"]').value
+            const phone = event.target.querySelector('input[name="phone"]').value
+            const email = event.target.querySelector('input[name="email"]').value
+
+            await fetchData(url, 'POST', {
+                item: radio,
+                name: name,
+                lastName: lastName,
+                address: address,
+                city: city,
+                phone: phone,
+                email: email,
+                status: 'Pateikta'
+            })
+            if (addTask) {
+            document.querySelector('div[role="alert"]').textContent = 'Užsakymas sėkmingai pateiktas'
+            document.querySelector('div[role="alert"]').style.display = 'block'
+            }
+        }
+        
+
+    </script>
+</body>
+
+</html>
