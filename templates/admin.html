@@ -27,14 +27,14 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-          <a class="navbar-brand" href="http://localhost:3000/">Pradinis užsakymo puslapis</a>
+          <a class="navbar-brand" href="/">Pradinis užsakymo puslapis</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-                <a class="nav-link active" aria-current="page" href="http://localhost:3000/eshop/admin">Peržiūrėti užsakymus</a>
-                <a class="nav-link active" aria-current="page" href="http://localhost:3000/eshop/prekes">Prekių sąrašas</a>
+                <a class="nav-link active" aria-current="page" href="/eshop/admin">Peržiūrėti užsakymus</a>
+                <a class="nav-link active" aria-current="page" href="/eshop/prekes">Prekių sąrašas</a>
             </div>
           </div>
         </div>
@@ -72,7 +72,7 @@
             const parent = element.parentNode.parentNode
             const id = parent.dataset.id
  
-            if(await fetchData('http://localhost:3000/eshop/update/' + id, 'PUT', {
+            if(await fetchData('/eshop/update/' + id, 'PUT', {
                     status: 'Užbaigta'
                 })) {
                 ordersList('Būsena pakeista')
@@ -86,7 +86,7 @@
             const parent = element.parentNode.parentNode
             const id = parent.dataset.id
 
-            if(await fetchData('http://localhost:3000/eshop/update/' + id, 'PUT', {
+            if(await fetchData('/eshop/update/' + id, 'PUT', {
                     status: 'Atšaukta'
                 })) {
                 ordersList('Būsena pakeista')
@@ -100,7 +100,7 @@
             const parent = element.parentNode.parentNode
             const id = parent.dataset.id
 
-            if(await fetchData('http://localhost:3000/eshop/delete/' + id, 'DELETE')) {
+            if(await fetchData('/eshop/delete/' + id, 'DELETE')) {
                 ordersList('Užsakymas sėkmingai ištrintas')
             } else {
                 ordersList('Nepavyko ištrinti užsakymo', 'danger')
@@ -109,7 +109,7 @@
 
         const ordersList = async (message = '', status = 'success') => {
             let busena = ''
-            const orders = await fetchData('http://localhost:3000/eshop/all')
+            const orders = await fetchData('/eshop/all')
 
             let html = ''
 
