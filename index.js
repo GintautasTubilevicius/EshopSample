@@ -8,7 +8,7 @@ import router from './controller/orders.js'
 
 const app = express()
 
-// const port = process.env.PORT || 5000
+const port = process.env.PORT || 5000
 
 app.use( express.json() )
 
@@ -50,4 +50,4 @@ app.get('/login', (req, res) => {
 
 
 
-app.listen(3000)
+app.listen(port)
